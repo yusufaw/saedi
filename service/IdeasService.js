@@ -35,9 +35,22 @@ const IdeasService = () => {
     });
   }
 
+  const listIdea = (chat_id) => {
+    return new Promise((resolve, reject) => {
+      IdeasModel.find()
+        .then(result => {
+          resolve(result);
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  }
+
   return {
     addIdea: addIdea,
-    updateIdea: updateIdea
+    updateIdea: updateIdea,
+    listIdea: listIdea
   }
 }
 module.exports = IdeasService();

@@ -174,16 +174,26 @@ bot.on('text', ctx => {
 })
 bot.launch()
 
-// var CronJob = require('cron').CronJob;
-// new CronJob('* * * * * *', function() {
-//   console.log('You will see this message every second');
-// }, null, true, 'America/Los_Angeles');
-
+var CronJob = require('cron').CronJob;
 var request = require('request');
-request('http://www.google.com', function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-        console.log(body) // Print the google web page.
-     }
-})
+
+function doJob() {
+  return IdeasService.listIdea()
+    .then(result => {
+      result.forEach(function(item) {
+        const mes = item.message_response
+        const resRandom = mes[Math.floor(Math.random() * mes.length)]
+        request.post('https://api.telegram.org/bot' + process.env.MBOT_TOKEN + '/sendMessage?chat_id='+ item.chat_id +'&text=' + resRandom.idea)
+      })
+
+    }).catch(err => {
+      console.err(err)
+    });
+}
+new CronJob('*/20 * * * * *', function() {
+  doJob()
+
+}, null, true, 'America/Los_Angeles');
+
 
 module.exports = app;
