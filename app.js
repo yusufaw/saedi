@@ -10,6 +10,7 @@ var logs = require('./routes/logs');
 
 const LogService = require('./service/LogService');
 const CommandService = require('./service/CommandService');
+const IdeasService = require('./service/IdeasService');
 
 var app = express();
 
@@ -58,6 +59,43 @@ bot.start((ctx) => ctx.reply('Welcome'))
 bot.help((ctx) => ctx.reply('Send me a sticker'))
 bot.on('sticker', (ctx) => ctx.reply('👍'))
 bot.hears('hi', (ctx) => ctx.reply('Hey there!'))
+bot.command('idea', (ctx) => {
+  var regex = /\[(.*)\](?:| )\[((.|\n)*)\]/
+  const found = ctx.message.text.match(regex);
+  if (found && found.length > 2) {
+    const cmd = {
+      'chat_id': ctx.message.chat.id,
+      'message_response': {
+        'idea': found[1],
+        'source': found[2]
+      }
+    }
+
+    IdeasService.updateIdea(cmd)
+      .then(result => {
+        if (!result) {
+          IdeasService.addIdea(cmd)
+            .then(result => {
+              return ctx.reply('mantap! jal ngetiko ' + found[1])
+            })
+            .catch(err => {
+              console.log(err);
+              return ctx.reply('lagi error bos!')
+            })
+        } else {
+          return ctx.reply('mantap! jal ngetiko ' + found[1])
+        }
+      }).catch(err => {
+        console.log(err);
+        return ctx.reply('lagi error bos!')
+      })
+
+
+  } else {
+    return ctx.reply('mbok sing bener, ngene lho\n\n/idea [pagi] [pagi juga!]')
+  }
+})
+
 bot.command('respon', (ctx) => {
   var regex = /\[(.*)\](?:| )\[((.|\n)*)\]/
   const found = ctx.message.text.match(regex);
@@ -135,5 +173,17 @@ bot.on('text', ctx => {
     });
 })
 bot.launch()
+
+// var CronJob = require('cron').CronJob;
+// new CronJob('* * * * * *', function() {
+//   console.log('You will see this message every second');
+// }, null, true, 'America/Los_Angeles');
+
+var request = require('request');
+request('http://www.google.com', function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+        console.log(body) // Print the google web page.
+     }
+})
 
 module.exports = app;
