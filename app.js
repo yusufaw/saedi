@@ -183,7 +183,9 @@ function doJob() {
       result.forEach(function(item) {
         const mes = item.message_response
         const resRandom = mes[Math.floor(Math.random() * mes.length)]
-        request.post('https://api.telegram.org/bot' + process.env.MBOT_TOKEN + '/sendMessage?chat_id='+ item.chat_id +'&text=' + resRandom.idea)
+
+        const text = '<b>'+resRandom.idea +'</b>\n\n' + resRandom.source
+        request.post('https://api.telegram.org/bot' + process.env.MBOT_TOKEN + '/sendMessage?chat_id='+ item.chat_id +'&disable_web_page_preview=true&parse_mode=html&text=' + text)
       })
 
     }).catch(err => {
